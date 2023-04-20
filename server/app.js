@@ -1,14 +1,34 @@
+
 const express = require('express')
 const { ApolloServer } = require('apollo-server-express')
+const mongoose = require('mongoose')
 
 //Load schema & resolvers
 const typeDefs = require('./schema/schema')
 const resolvers = require('./resolver/resolver')
 
-async function startApolloServer(typeDefs, resolvers) {
+//Load db methods
+const mongoDataMethods = require('./data/db')
+
+//Connect to MongoDB
+const connectDB = async () => {
+    try {
+        await mongoose.connect('mongodb+srv://quynhchilai:0811Blue@tutorial01.adjuhty.mongodb.net/?retryWrites=true&w=majority',
+        {})
+        console.log('MongoDB connected');
+    } catch (error) {
+        console.log(error.message);
+        process.exit(1);
+    }
+}
+
+connectDB()
+
+async function startApolloServer(typeDefs,resolvers) {
     const server = new ApolloServer({
         typeDefs,
-        resolvers
+        resolvers,
+        context: () => ({ mongoDataMethods })
     })
     const app = express()
     await server.start()
